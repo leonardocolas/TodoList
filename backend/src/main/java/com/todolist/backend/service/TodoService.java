@@ -19,6 +19,7 @@ public class TodoService {
     private final TodoRepository todoRepository;
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public List<TodoResponse> getUserTodos(String username) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));

@@ -8,7 +8,6 @@ import { App } from './app';
 import { JwtModule } from '@auth0/angular-jwt';
 import { JwtInterceptor } from './interceptors/jwt.interceptor';
 
-import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { TodoListComponent } from './components/todo-list/todo-list.component';
@@ -23,7 +22,6 @@ export function tokenGetter() {
 @NgModule({
   declarations: [
     App,
-    LoginComponent,
     RegisterComponent,
     NavbarComponent,
     TodoListComponent,
