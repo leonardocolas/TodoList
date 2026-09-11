@@ -14,13 +14,17 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
-    
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username)
             .map(user -> new User(
                 user.getUsername(),
                 user.getPassword(),
+                user.isEnabled(),
+                true,
+                true,
+                true,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
             ))
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));

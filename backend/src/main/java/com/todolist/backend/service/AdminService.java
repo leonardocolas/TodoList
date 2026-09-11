@@ -7,6 +7,8 @@ import com.todolist.backend.dto.UserResponse;
 import com.todolist.backend.entity.Role;
 import com.todolist.backend.entity.Todo;
 import com.todolist.backend.entity.User;
+import com.todolist.backend.exception.ConflictException;
+import com.todolist.backend.exception.ResourceNotFoundException;
 import com.todolist.backend.repository.TodoRepository;
 import com.todolist.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,16 +35,16 @@ public class AdminService {
 
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         return mapToUserResponse(user);
     }
 
     public UserResponse createUser(UserRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new ConflictException("Username ya existe");
         }
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+        if (request.getEmail() != null && userRepository.existsByEmail(request.getEmail())) {
+            throw new ConflictException("Email ya existe");
         }
 
         Role role = Role.USER;
@@ -50,7 +52,7 @@ public class AdminService {
             try {
                 role = Role.valueOf(request.getRole().toUpperCase());
             } catch (IllegalArgumentException e) {
-                throw new RuntimeException("Invalid role: " + request.getRole());
+                throw new IllegalArgumentException("Rol invalido: " + request.getRole());
             }
         }
 
@@ -59,27 +61,28 @@ public class AdminService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(role)
-                .enabled(request.isEnabled())
+                .enabled(request.getEnabled() != null ? request.getEnabled() : true)
                 .build();
 
         user = userRepository.save(user);
         return mapToUserResponse(user);
     }
 
+    @Transactional
     public UserResponse updateUser(Long id, UserRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         if (request.getUsername() != null) {
             if (!user.getUsername().equals(request.getUsername()) && userRepository.existsByUsername(request.getUsername())) {
-                throw new RuntimeException("Username already exists");
+                throw new ConflictException("Username ya existe");
             }
             user.setUsername(request.getUsername());
         }
 
         if (request.getEmail() != null) {
             if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
-                throw new RuntimeException("Email already exists");
+                throw new ConflictException("Email ya existe");
             }
             user.setEmail(request.getEmail());
         }
@@ -92,34 +95,35 @@ public class AdminService {
             try {
                 user.setRole(Role.valueOf(request.getRole().toUpperCase()));
             } catch (IllegalArgumentException e) {
-                throw new RuntimeException("Invalid role: " + request.getRole());
+                throw new IllegalArgumentException("Rol invalido: " + request.getRole());
             }
         }
 
-        user.setEnabled(request.isEnabled());
+        if (request.getEnabled() != null) {
+            user.setEnabled(request.getEnabled());
+        }
 
         user = userRepository.save(user);
         return mapToUserResponse(user);
     }
 
+    @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
-        List<Todo> todos = todoRepository.findByUser(user);
-        todoRepository.deleteAll(todos);
-
+        todoRepository.deleteByUser(user);
         userRepository.delete(user);
     }
 
     public UserResponse changeRole(Long id, RoleRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         try {
             user.setRole(Role.valueOf(request.getRole().toUpperCase()));
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid role: " + request.getRole());
+            throw new IllegalArgumentException("Rol invalido: " + request.getRole());
         }
 
         user = userRepository.save(user);
@@ -135,7 +139,7 @@ public class AdminService {
 
     public List<TodoResponse> getTodosByUserId(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         return todoRepository.findByUser(user)
                 .stream()
@@ -143,9 +147,10 @@ public class AdminService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public void deleteTodo(Long id) {
         Todo todo = todoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Todo not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Todo no encontrado"));
         todoRepository.delete(todo);
     }
 

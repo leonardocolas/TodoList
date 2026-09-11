@@ -16,10 +16,6 @@ import { AdminDashboardComponent } from './components/admin/admin-dashboard/admi
 import { AdminUsersComponent } from './components/admin/admin-users/admin-users.component';
 import { AdminTodosComponent } from './components/admin/admin-todos/admin-todos.component';
 
-import { AuthService } from './services/auth.service';
-import { TodoService } from './services/todo.service';
-import { AdminService } from './services/admin.service';
-
 export function tokenGetter() {
   return localStorage.getItem('auth_token');
 }
@@ -52,10 +48,7 @@ export function tokenGetter() {
     provideBrowserGlobalErrorListeners(),
     provideClientHydration(),
     provideHttpClient(withInterceptorsFromDi()),
-    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-    AuthService,
-    TodoService,
-    AdminService
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
   ],
   bootstrap: [App]
 })

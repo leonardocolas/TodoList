@@ -36,7 +36,7 @@ export class LoginComponent {
         },
         error: (err) => {
           this.isLoading = false;
-          this.errorMessage = 'Credenciales inválidas. Por favor, intenta de nuevo.';
+          this.errorMessage = err.error?.message || 'Credenciales invalidas. Por favor, intenta de nuevo.';
         }
       });
     }

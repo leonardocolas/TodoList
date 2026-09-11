@@ -34,12 +34,13 @@ export class AdminUsersComponent implements OnInit {
 
   loadUsers(): void {
     this.isLoading = true;
+    this.errorMessage = '';
     this.adminService.getAllUsers().subscribe({
       next: (users: User[]) => {
         this.users = users;
         this.isLoading = false;
       },
-      error: (err: any) => {
+      error: () => {
         this.isLoading = false;
         this.errorMessage = 'Error al cargar usuarios';
       }
@@ -73,6 +74,7 @@ export class AdminUsersComponent implements OnInit {
     this.showForm = false;
     this.editingUser = null;
     this.userForm.reset();
+    this.errorMessage = '';
   }
 
   onSubmit(): void {
@@ -110,14 +112,16 @@ export class AdminUsersComponent implements OnInit {
   }
 
   toggleRole(user: User): void {
+    if (!user.id) return;
     const newRole = user.role === 'ADMIN' ? 'USER' : 'ADMIN';
     if (confirm(`¿Cambiar el rol de ${user.username} a ${newRole}?`)) {
-      this.adminService.changeRole(user.id!, newRole).subscribe({
+      this.errorMessage = '';
+      this.adminService.changeRole(user.id, newRole).subscribe({
         next: () => {
           this.successMessage = `Rol cambiado a ${newRole}`;
           this.loadUsers();
         },
-        error: (err: any) => {
+        error: () => {
           this.errorMessage = 'Error al cambiar rol';
         }
       });
@@ -125,13 +129,15 @@ export class AdminUsersComponent implements OnInit {
   }
 
   deleteUser(user: User): void {
+    if (!user.id) return;
     if (confirm(`¿Estás seguro de que quieres eliminar al usuario ${user.username}? Se eliminarán todas sus tareas.`)) {
-      this.adminService.deleteUser(user.id!).subscribe({
+      this.errorMessage = '';
+      this.adminService.deleteUser(user.id).subscribe({
         next: () => {
           this.successMessage = 'Usuario eliminado correctamente';
           this.loadUsers();
         },
-        error: (err: any) => {
+        error: () => {
           this.errorMessage = 'Error al eliminar usuario';
         }
       });

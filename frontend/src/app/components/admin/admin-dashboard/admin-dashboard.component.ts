@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AdminService } from '../../../services/admin.service';
 import { User } from '../../../models/user.model';
 import { Todo } from '../../../models/todo.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -9,11 +10,12 @@ import { Todo } from '../../../models/todo.model';
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.css']
 })
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboardComponent implements OnInit, OnDestroy {
   totalUsers = 0;
   totalTodos = 0;
   completedTodos = 0;
   pendingTodos = 0;
+  private subs: Subscription[] = [];
 
   constructor(private adminService: AdminService) {}
 
@@ -21,19 +23,29 @@ export class AdminDashboardComponent implements OnInit {
     this.loadStats();
   }
 
-  loadStats(): void {
-    this.adminService.getAllUsers().subscribe({
-      next: (users: User[]) => {
-        this.totalUsers = users.length;
-      }
-    });
+  ngOnDestroy(): void {
+    this.subs.forEach(s => s.unsubscribe());
+  }
 
-    this.adminService.getAllTodos().subscribe({
-      next: (todos: Todo[]) => {
-        this.totalTodos = todos.length;
-        this.completedTodos = todos.filter((t: Todo) => t.completed).length;
-        this.pendingTodos = todos.filter((t: Todo) => !t.completed).length;
-      }
-    });
+  loadStats(): void {
+    this.subs.push(
+      this.adminService.getAllUsers().subscribe({
+        next: (users: User[]) => {
+          this.totalUsers = users.length;
+        },
+        error: () => {}
+      })
+    );
+
+    this.subs.push(
+      this.adminService.getAllTodos().subscribe({
+        next: (todos: Todo[]) => {
+          this.totalTodos = todos.length;
+          this.completedTodos = todos.filter((t: Todo) => t.completed).length;
+          this.pendingTodos = todos.filter((t: Todo) => !t.completed).length;
+        },
+        error: () => {}
+      })
+    );
   }
 }

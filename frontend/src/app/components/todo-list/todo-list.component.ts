@@ -30,12 +30,13 @@ export class TodoListComponent implements OnInit {
 
   loadTodos(): void {
     this.isLoading = true;
+    this.errorMessage = '';
     this.todoService.getTodos().subscribe({
       next: (todos) => {
         this.todos = todos;
         this.isLoading = false;
       },
-      error: (err) => {
+      error: () => {
         this.isLoading = false;
         this.errorMessage = 'Error al cargar las tareas';
       }
@@ -43,6 +44,7 @@ export class TodoListComponent implements OnInit {
   }
 
   openForm(todo?: Todo): void {
+    this.errorMessage = '';
     if (todo) {
       this.editingTodo = todo;
       this.todoForm.patchValue({
@@ -60,6 +62,7 @@ export class TodoListComponent implements OnInit {
     this.showForm = false;
     this.editingTodo = null;
     this.todoForm.reset();
+    this.errorMessage = '';
   }
 
   onSubmit(): void {
@@ -77,7 +80,7 @@ export class TodoListComponent implements OnInit {
             this.loadTodos();
             this.closeForm();
           },
-          error: (err) => {
+          error: () => {
             this.errorMessage = 'Error al actualizar la tarea';
           }
         });
@@ -87,7 +90,7 @@ export class TodoListComponent implements OnInit {
             this.loadTodos();
             this.closeForm();
           },
-          error: (err) => {
+          error: () => {
             this.errorMessage = 'Error al crear la tarea';
           }
         });
@@ -96,13 +99,14 @@ export class TodoListComponent implements OnInit {
   }
 
   toggleCompleted(todo: Todo): void {
+    if (!todo.id) return;
     const updated: Todo = {
       ...todo,
       completed: !todo.completed
     };
-    this.todoService.updateTodo(todo.id!, updated).subscribe({
+    this.todoService.updateTodo(todo.id, updated).subscribe({
       next: () => this.loadTodos(),
-      error: (err) => {
+      error: () => {
         this.errorMessage = 'Error al actualizar la tarea';
       }
     });
@@ -110,9 +114,10 @@ export class TodoListComponent implements OnInit {
 
   deleteTodo(id: number): void {
     if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
+      this.errorMessage = '';
       this.todoService.deleteTodo(id).subscribe({
         next: () => this.loadTodos(),
-        error: (err) => {
+        error: () => {
           this.errorMessage = 'Error al eliminar la tarea';
         }
       });
