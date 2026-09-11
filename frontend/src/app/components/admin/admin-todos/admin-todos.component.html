@@ -1,0 +1,109 @@
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Gestionar Tareas</h1>
+      <p class="text-slate-500 mt-1">{{ todos.length }} tarea{{ todos.length !== 1 ? 's' : '' }}</p>
+    </div>
+  </div>
+
+  <!-- Filtro por usuario -->
+  <div class="mb-6 bg-white rounded-xl border border-slate-100 p-4">
+    <label class="block text-sm font-medium text-slate-700 mb-2">Filtrar por usuario</label>
+    <div class="flex flex-wrap gap-2">
+      <button (click)="filterByUser(null)"
+              class="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
+              [ngClass]="selectedUserId === null ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+        Todos
+      </button>
+      <button *ngFor="let user of users" (click)="filterByUser(user.id!)"
+              class="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
+              [ngClass]="selectedUserId === user.id ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+        {{ user.username }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage"
+       class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 flex items-center justify-between">
+    <span>{{ errorMessage }}</span>
+    <button (click)="errorMessage = ''" class="text-red-400 hover:text-red-600">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <div *ngIf="successMessage"
+       class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-sm text-green-600 flex items-center justify-between">
+    <span>{{ successMessage }}</span>
+    <button (click)="successMessage = ''" class="text-green-400 hover:text-green-600">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="flex justify-center py-12">
+    <div class="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full"></div>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!isLoading && todos.length === 0"
+       class="text-center py-16 bg-white rounded-2xl border border-slate-100">
+    <svg class="w-16 h-16 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+    </svg>
+    <h3 class="text-lg font-medium text-slate-600">No hay tareas</h3>
+    <p class="text-slate-400 mt-1">No se encontraron tareas para mostrar</p>
+  </div>
+
+  <!-- Lista de tareas -->
+  <div *ngIf="!isLoading && todos.length > 0" class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-slate-50 border-b border-slate-100">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Estado</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Usuario</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Título</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Descripción</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Fecha</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let todo of todos" class="hover:bg-slate-50 transition-colors">
+            <td class="px-6 py-4">
+              <button class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                      [ngClass]="todo.completed ? 'bg-green-500 border-green-500' : 'border-slate-300'">
+                <svg *ngIf="todo.completed" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </button>
+            </td>
+            <td class="px-6 py-4">
+              <span class="text-sm text-slate-600">{{ todo.username }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="font-medium text-slate-800"
+                    [ngClass]="{ 'line-through text-slate-400': todo.completed }">
+                {{ todo.title }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-500 max-w-xs truncate">{{ todo.description || '-' }}</td>
+            <td class="px-6 py-4 text-sm text-slate-500">{{ todo.createdAt | date:'dd/MM/yyyy' }}</td>
+            <td class="px-6 py-4 text-right">
+              <button (click)="deleteTodo(todo)"
+                      class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

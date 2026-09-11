@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+.mvn/
+target/
+
+# IDE
+.idea/
+.vscode/
+*.iws
+*.iml
+*.ipr
+
+# Build
+dist/
+build/
+*.class
+*.jar
+
+# Environment
+.env
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Angular
+.angular/
+.sass-cache/
+
+# Spring Boot
+*.springBeans
+.sts4-cache
+.classpath
+.project
+.settings/
+.factorypath
+
+# Compiled
+/out-tsc/
+/bazel-out/
+
+# Test
+/coverage
+/testem.log
+
+# Misc
+/connect.lock
+/libpeerconnection.log
+/typings
+__screenshots__/
+
+# Lock files that shouldn't be committed for learning
+# package-lock.json
+# pom.xml.lock

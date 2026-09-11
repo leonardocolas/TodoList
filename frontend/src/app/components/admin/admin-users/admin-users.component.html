@@ -1,0 +1,178 @@
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Gestionar Usuarios</h1>
+      <p class="text-slate-500 mt-1">{{ users.length }} usuario{{ users.length !== 1 ? 's' : '' }}</p>
+    </div>
+    <button (click)="openForm()"
+            class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors
+                   flex items-center space-x-2 shadow-sm">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      <span>Nuevo Usuario</span>
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage"
+       class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 flex items-center justify-between">
+    <span>{{ errorMessage }}</span>
+    <button (click)="errorMessage = ''" class="text-red-400 hover:text-red-600">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <div *ngIf="successMessage"
+       class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-sm text-green-600 flex items-center justify-between">
+    <span>{{ successMessage }}</span>
+    <button (click)="successMessage = ''" class="text-green-400 hover:text-green-600">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Modal formulario -->
+  <div *ngIf="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-bold text-slate-800">
+          {{ editingUser ? 'Editar Usuario' : 'Nuevo Usuario' }}
+        </h2>
+        <button (click)="closeForm()" class="text-slate-400 hover:text-slate-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">Usuario</label>
+          <input type="text" formControlName="username" placeholder="Nombre de usuario"
+                 class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400
+                        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+          <p *ngIf="userForm.get('username')?.touched && userForm.get('username')?.hasError('required')"
+             class="mt-1.5 text-sm text-red-500">El usuario es requerido</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+          <input type="email" formControlName="email" placeholder="correo@ejemplo.com"
+                 class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400
+                        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+          <p *ngIf="userForm.get('email')?.touched && userForm.get('email')?.hasError('required')"
+             class="mt-1.5 text-sm text-red-500">El email es requerido</p>
+          <p *ngIf="userForm.get('email')?.touched && userForm.get('email')?.hasError('email')"
+             class="mt-1.5 text-sm text-red-500">Email inválido</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">
+            Contraseña {{ editingUser ? '(dejar vacío para no cambiar)' : '' }}
+          </label>
+          <input type="password" formControlName="password" placeholder="Contraseña"
+                 class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400
+                        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+          <p *ngIf="userForm.get('password')?.touched && userForm.get('password')?.hasError('required') && !editingUser"
+             class="mt-1.5 text-sm text-red-500">La contraseña es requerida</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">Rol</label>
+          <select formControlName="role"
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800
+                         focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+            <option value="USER">USER</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <input type="checkbox" formControlName="enabled" id="enabled"
+                 class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500">
+          <label for="enabled" class="text-sm font-medium text-slate-700">Habilitado</label>
+        </div>
+
+        <div *ngIf="errorMessage" class="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+          {{ errorMessage }}
+        </div>
+
+        <div class="flex space-x-3 pt-2">
+          <button type="button" (click)="closeForm()"
+                  class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="userForm.invalid"
+                  class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white font-medium rounded-xl transition-colors">
+            {{ editingUser ? 'Guardar' : 'Crear' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="flex justify-center py-12">
+    <div class="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full"></div>
+  </div>
+
+  <!-- Tabla de usuarios -->
+  <div *ngIf="!isLoading && users.length > 0" class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-slate-50 border-b border-slate-100">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Usuario</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Email</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Rol</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Estado</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let user of users" class="hover:bg-slate-50 transition-colors">
+            <td class="px-6 py-4">
+              <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <span class="text-sm font-medium text-indigo-600">{{ user.username.charAt(0).toUpperCase() }}</span>
+                </div>
+                <span class="font-medium text-slate-800">{{ user.username }}</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-500">{{ user.email }}</td>
+            <td class="px-6 py-4">
+              <button (click)="toggleRole(user)"
+                      class="px-3 py-1 text-xs font-medium rounded-full transition-colors"
+                      [ngClass]="user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+                {{ user.role }}
+              </button>
+            </td>
+            <td class="px-6 py-4">
+              <span class="px-2.5 py-0.5 text-xs font-medium rounded-full"
+                    [ngClass]="user.enabled ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+                {{ user.enabled ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right space-x-2">
+              <button (click)="openForm(user)"
+                      class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </button>
+              <button (click)="deleteUser(user)"
+                      class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
