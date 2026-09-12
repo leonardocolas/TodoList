@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -20,7 +20,8 @@ export class RegisterComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private changeDetector: ChangeDetectorRef
   ) {
     this.registerForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
@@ -56,6 +57,7 @@ export class RegisterComponent {
         next: () => {
           this.isLoading = false;
           this.successMessage = 'Registro exitoso. Redirigiendo al login...';
+          this.changeDetector.detectChanges();
           setTimeout(() => {
             this.router.navigate(['/login']);
           }, 1500);
@@ -63,6 +65,7 @@ export class RegisterComponent {
         error: (err) => {
           this.isLoading = false;
           this.errorMessage = err.error?.message || 'Error al registrar. Intenta de nuevo.';
+          this.changeDetector.detectChanges();
         }
       });
     }

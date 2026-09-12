@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user.model';
@@ -15,11 +15,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
   menuOpen = false;
   private userSub?: Subscription;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private changeDetector: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.userSub = this.authService.currentUser$.subscribe(user => {
       this.user = user;
+      this.changeDetector.detectChanges();
     });
   }
 

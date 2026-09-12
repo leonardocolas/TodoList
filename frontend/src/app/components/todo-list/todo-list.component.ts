@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TodoService } from '../../services/todo.service';
 import { Todo } from '../../models/todo.model';
@@ -17,7 +17,11 @@ export class TodoListComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
 
-  constructor(private todoService: TodoService, private fb: FormBuilder) {
+  constructor(
+    private todoService: TodoService,
+    private fb: FormBuilder,
+    private changeDetector: ChangeDetectorRef
+  ) {
     this.todoForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', []]
@@ -35,10 +39,12 @@ export class TodoListComponent implements OnInit {
       next: (todos) => {
         this.todos = todos;
         this.isLoading = false;
+        this.changeDetector.detectChanges();
       },
       error: () => {
         this.isLoading = false;
         this.errorMessage = 'Error al cargar las tareas';
+        this.changeDetector.detectChanges();
       }
     });
   }
@@ -56,6 +62,7 @@ export class TodoListComponent implements OnInit {
       this.todoForm.reset();
     }
     this.showForm = true;
+    this.changeDetector.detectChanges();
   }
 
   closeForm(): void {
@@ -63,6 +70,7 @@ export class TodoListComponent implements OnInit {
     this.editingTodo = null;
     this.todoForm.reset();
     this.errorMessage = '';
+    this.changeDetector.detectChanges();
   }
 
   onSubmit(): void {
@@ -79,9 +87,11 @@ export class TodoListComponent implements OnInit {
           next: () => {
             this.loadTodos();
             this.closeForm();
+            this.changeDetector.detectChanges();
           },
           error: () => {
             this.errorMessage = 'Error al actualizar la tarea';
+            this.changeDetector.detectChanges();
           }
         });
       } else {
@@ -89,9 +99,11 @@ export class TodoListComponent implements OnInit {
           next: () => {
             this.loadTodos();
             this.closeForm();
+            this.changeDetector.detectChanges();
           },
           error: () => {
             this.errorMessage = 'Error al crear la tarea';
+            this.changeDetector.detectChanges();
           }
         });
       }
@@ -105,9 +117,13 @@ export class TodoListComponent implements OnInit {
       completed: !todo.completed
     };
     this.todoService.updateTodo(todo.id, updated).subscribe({
-      next: () => this.loadTodos(),
+      next: () => {
+        this.loadTodos();
+        this.changeDetector.detectChanges();
+      },
       error: () => {
         this.errorMessage = 'Error al actualizar la tarea';
+        this.changeDetector.detectChanges();
       }
     });
   }
@@ -119,6 +135,7 @@ export class TodoListComponent implements OnInit {
         next: () => this.loadTodos(),
         error: () => {
           this.errorMessage = 'Error al eliminar la tarea';
+          this.changeDetector.detectChanges();
         }
       });
     }

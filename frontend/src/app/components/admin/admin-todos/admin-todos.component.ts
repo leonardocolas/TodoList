@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AdminService } from '../../../services/admin.service';
 import { User } from '../../../models/user.model';
 import { Todo } from '../../../models/todo.model';
@@ -17,7 +17,10 @@ export class AdminTodosComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private changeDetector: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -26,8 +29,11 @@ export class AdminTodosComponent implements OnInit {
 
   loadUsers(): void {
     this.adminService.getAllUsers().subscribe({
-      next: (users: User[]) => this.users = users,
-      error: () => {}
+      next: (users: User[]) => {
+        this.users = users;
+        this.changeDetector.detectChanges();
+      },
+      error: () => this.changeDetector.detectChanges()
     });
   }
 
@@ -38,16 +44,18 @@ export class AdminTodosComponent implements OnInit {
       next: (todos: Todo[]) => {
         this.todos = todos;
         this.isLoading = false;
+        this.changeDetector.detectChanges();
       },
       error: () => {
         this.isLoading = false;
         this.errorMessage = 'Error al cargar las tareas';
+        this.changeDetector.detectChanges();
       }
     });
   }
 
   filterByUser(userId: number | null): void {
-    this.selectedUserId = userId;
+    this.selectedUserId = userId === null ? null : Number(userId);
     this.errorMessage = '';
     this.successMessage = '';
     if (userId === null) {
@@ -58,10 +66,12 @@ export class AdminTodosComponent implements OnInit {
         next: (todos: Todo[]) => {
           this.todos = todos;
           this.isLoading = false;
+          this.changeDetector.detectChanges();
         },
         error: () => {
           this.isLoading = false;
           this.errorMessage = 'Error al cargar las tareas del usuario';
+          this.changeDetector.detectChanges();
         }
       });
     }

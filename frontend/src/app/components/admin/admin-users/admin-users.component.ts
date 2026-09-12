@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminService } from '../../../services/admin.service';
 import { User } from '../../../models/user.model';
@@ -19,7 +19,11 @@ export class AdminUsersComponent implements OnInit {
   successMessage = '';
   showPassword = false;
 
-  constructor(private adminService: AdminService, private fb: FormBuilder) {
+  constructor(
+    private adminService: AdminService,
+    private fb: FormBuilder,
+    private changeDetector: ChangeDetectorRef
+  ) {
     this.userForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
@@ -40,10 +44,12 @@ export class AdminUsersComponent implements OnInit {
       next: (users: User[]) => {
         this.users = users;
         this.isLoading = false;
+        this.changeDetector.detectChanges();
       },
       error: () => {
         this.isLoading = false;
         this.errorMessage = 'Error al cargar usuarios';
+        this.changeDetector.detectChanges();
       }
     });
   }
@@ -93,9 +99,11 @@ export class AdminUsersComponent implements OnInit {
             this.successMessage = 'Usuario actualizado correctamente';
             this.loadUsers();
             this.closeForm();
+            this.changeDetector.detectChanges();
           },
           error: (err: any) => {
             this.errorMessage = err.error?.message || 'Error al actualizar usuario';
+            this.changeDetector.detectChanges();
           }
         });
       } else {
@@ -104,9 +112,11 @@ export class AdminUsersComponent implements OnInit {
             this.successMessage = 'Usuario creado correctamente';
             this.loadUsers();
             this.closeForm();
+            this.changeDetector.detectChanges();
           },
           error: (err: any) => {
             this.errorMessage = err.error?.message || 'Error al crear usuario';
+            this.changeDetector.detectChanges();
           }
         });
       }
@@ -122,9 +132,11 @@ export class AdminUsersComponent implements OnInit {
         next: () => {
           this.successMessage = `Rol cambiado a ${newRole}`;
           this.loadUsers();
+          this.changeDetector.detectChanges();
         },
         error: () => {
           this.errorMessage = 'Error al cambiar rol';
+          this.changeDetector.detectChanges();
         }
       });
     }
@@ -138,9 +150,11 @@ export class AdminUsersComponent implements OnInit {
         next: () => {
           this.successMessage = 'Usuario eliminado correctamente';
           this.loadUsers();
+          this.changeDetector.detectChanges();
         },
         error: () => {
           this.errorMessage = 'Error al eliminar usuario';
+          this.changeDetector.detectChanges();
         }
       });
     }

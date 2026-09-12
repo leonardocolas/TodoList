@@ -10,6 +10,10 @@ import java.util.List;
 
 public interface TodoRepository extends JpaRepository<Todo, Long> {
 
+    @Override
+    @EntityGraph(attributePaths = {"user"})
+    List<Todo> findAll();
+
     @EntityGraph(attributePaths = {"user"})
     List<Todo> findByUser(User user);
 

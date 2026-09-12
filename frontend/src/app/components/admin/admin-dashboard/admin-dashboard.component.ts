@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { AdminService } from '../../../services/admin.service';
 import { User } from '../../../models/user.model';
 import { Todo } from '../../../models/todo.model';
@@ -17,7 +17,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   pendingTodos = 0;
   private subs: Subscription[] = [];
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private changeDetector: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadStats();
@@ -32,8 +35,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       this.adminService.getAllUsers().subscribe({
         next: (users: User[]) => {
           this.totalUsers = users.length;
+          this.changeDetector.detectChanges();
         },
-        error: () => {}
+        error: () => this.changeDetector.detectChanges()
       })
     );
 
@@ -43,8 +47,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           this.totalTodos = todos.length;
           this.completedTodos = todos.filter((t: Todo) => t.completed).length;
           this.pendingTodos = todos.filter((t: Todo) => !t.completed).length;
+          this.changeDetector.detectChanges();
         },
-        error: () => {}
+        error: () => this.changeDetector.detectChanges()
       })
     );
   }

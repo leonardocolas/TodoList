@@ -4,7 +4,7 @@
       <h1 class="text-2xl font-bold text-slate-800">Mis Tareas</h1>
       <p class="text-slate-500 mt-1">{{ todos.length }} tarea{{ todos.length !== 1 ? 's' : '' }}</p>
     </div>
-    <button (click)="openForm()"
+    <button type="button" (click)="openForm()"
             class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors
                    flex items-center space-x-2 shadow-sm">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -20,7 +20,8 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private changeDetector: ChangeDetectorRef
   ) {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required]],
@@ -35,11 +36,13 @@ export class LoginComponent {
       this.authService.login(this.loginForm.value).subscribe({
         next: () => {
           this.isLoading = false;
+          this.changeDetector.detectChanges();
           this.router.navigate(['/todos']);
         },
         error: (err) => {
           this.isLoading = false;
           this.errorMessage = err.error?.message || 'Credenciales invalidas. Por favor, intenta de nuevo.';
+          this.changeDetector.detectChanges();
         }
       });
     }
