@@ -17,6 +17,7 @@ export class AdminUsersComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   successMessage = '';
+  showPassword = false;
 
   constructor(private adminService: AdminService, private fb: FormBuilder) {
     this.userForm = this.fb.group({
@@ -50,6 +51,7 @@ export class AdminUsersComponent implements OnInit {
   openForm(user?: User): void {
     this.errorMessage = '';
     this.successMessage = '';
+    this.showPassword = false;
 
     if (user) {
       this.editingUser = user;

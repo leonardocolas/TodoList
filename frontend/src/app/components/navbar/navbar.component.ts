@@ -12,6 +12,7 @@ import { Subscription } from 'rxjs';
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   user: User | null = null;
+  menuOpen = false;
   private userSub?: Subscription;
 
   constructor(private authService: AuthService, private router: Router) {}
@@ -31,7 +32,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
+    this.menuOpen = false;
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  closeMenu(): void {
+    this.menuOpen = false;
   }
 }
